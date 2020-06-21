@@ -1,0 +1,10 @@
+0 Cocomint
+1 Daunungu
+2 Jerukpurut
+3 Kejibeling
+4 Kelor
+5 Kumiskucing
+6 Lemonbalm
+7 Orangemint
+8 Spearmint
+9 Stevia

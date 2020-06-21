@@ -1,0 +1,61 @@
+<resources>
+    <string name="kosong"></string>
+    <string name="app_name">HerbalApp</string>
+    <string name="judul1"><u>Nama:</u></string>
+    <string name="judul2"><u>Nama Latin:</u></string>
+    <string name="judul3"><u>Khasiat dan Cara Pengolahan:</u></string>
+
+    <string name="no">Tidak terdefinisi</string>
+    <string name="tutorial"> Cara Kerja Aplikasi:
+        \n1. Tekan tombol ambil gambar.
+        \n2. Izinkan aplikasi untuk menggunakan perangkat kamera.
+        \n3. Ambil gambar daun yang diinginkan.
+        \n4. Nama tanaman hasil klasifikasi akan muncul.</string>
+
+    <string name="n0">Cocomint</string>
+    <string name="nl0"><i>Mentha piperita Chocolate</i></string>
+    <string name="k0">Untuk penambah energi, gunakan daun cocomint segar 7 helai dan air 110 ml,
+        diseduh dan diminum hingga 2 kali sehari, pagi dan/atau sore.</string>
+
+    <string name="n1">Daun Ungu</string>
+    <string name="nl1"><i>Graptophyllum hortense</i></string>
+    <string name="k1">Untuk obat wasir, gunakan 20 gram daun ungu segar
+        direbus dengan 2 gelas air selama 25 menit, dan disaring setelah dingin. Diminum dua kali sehari, pagi dan sore.</string>
+
+    <string name="n2">Jeruk Purut</string>
+    <string name="nl2"><i>Citrus Hystrix</i></string>
+    <string name="k2">Untuk obat batuk, peras daging buah hingga 1 sendok makan dan dicampur dengan 1 sendok the kecap manis.</string>
+
+    <string name="n3">Keji Beling</string>
+    <string name="nl3"><i>Strobilanthes Crispus</i></string>
+    <string name="k3">Untuk peluruh air seni, campurkan 25 gram daun keji beling segar dengan 2 gelas air, dan direbus selama 15 menit. Saring saat sudah dingin dan dapat langsung diminum.</string>
+
+    <string name="n4">Kelor</string>
+    <string name="nl4"><i>Moringa oleifera</i></string>
+    <string name="k4">Untuk sakit kuning, campuran 3-7 gagang daun kelor,
+        1 sendok makan madu dan 1 gelar air kelapa. Daun kelor ditumbuh halus, kemudian disaring dengan air kelapa dan dicampur dengan madu. Minum secara rutin hingga sembuh.</string>
+
+    <string name="n5">Kumis Kucing</string>
+    <string name="nl5"><i>Orthosiphon stamineus</i></string>
+    <string name="k5">Untuk mengobati kencing manis, gunakan daun kumis kucing 10 helai dan daun sambiloto 10 helai dicampur dalam air 110m, diminum 1 kali sehari.</string>
+
+    <string name="n6">Lemonbalm</string>
+    <string name="nl6"><i>Melissa officinalis</i></string>
+    <string name="k6">Untuk mengobati herpes,
+        gunakan daun lemonbalm yang telah ditumbuk dan dioleskan ke kulit hingga 2-4 kali sehari hingga sembuh.</string>
+
+    <string name="n7">Orangemint</string>
+    <string name="nl7"><i>Mentha piperita Citrata</i></string>
+    <string name="k7">Untuk meredakan sakit perut, gunakan
+        2-3 daun orangemint bersih dicampur dengan garam dan sedikit air panas, ditumbuk halus dan disaring sebelum diminum.</string>
+
+    <string name="n8">Spearmint</string>
+    <string name="nl8"><i>Mentha spicata</i></string>
+    <string name="k8">Untuk mengurangi sakit tenggorokan,
+        campurkan daun spearmint segar 10-20 helai dan dicampur dengan air secukupnya, dan diminum 1 kali sehari ¼ cangkir.</string>
+
+    <string name="n9">Stevia</string>
+    <string name="nl9"><i>Stevia rebaudiana</i></string>
+    <string name="k9">Untuk obat kencing manis, campurkan 4-6 helai daun stevia segar dengan 1 gelas air panas,
+        dan direbus selama 15 menit. Saring saat sudah dingin dan dapat langsung diminum.</string>
+</resources>
