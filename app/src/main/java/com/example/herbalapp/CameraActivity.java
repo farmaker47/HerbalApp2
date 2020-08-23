@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +34,7 @@ public class CameraActivity extends AppCompatActivity {
     TextView tvClassification;
 
     private Classifier Classifier;
+    private Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +42,21 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
         ButterKnife.bind(this);
         loadClassifier();
+
+        button = findViewById(R.id.btnTakePhoto);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<Classification> hasil = Classifier.recognizeImage();
+            }
+        });
+
     }
 
     private void loadClassifier() {
         try {
-            Classifier = Classifier.classifier(getAssets(), ModelConfig.MODEL);
+            Classifier = com.example.herbalapp.Classifier.classifier(getAssets(), ModelConfig.MODEL, this);
         } catch (IOException e) {
             Toast.makeText(this, "Model gagal dibaca.", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
@@ -95,7 +108,7 @@ public class CameraActivity extends AppCompatActivity {
         Bitmap prep = ImageUtils.preprocess(original);
         //ivFinalPreview.setImageBitmap(prep);
 
-        List<Classification> hasil = Classifier.recognizeImage(prep);
+        List<Classification> hasil = Classifier.recognizeImage();
         //tvClassification.setText(hasil.toString());
 
         //Bitmap bmp = prep;

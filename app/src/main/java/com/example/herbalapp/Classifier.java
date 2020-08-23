@@ -1,17 +1,22 @@
 package com.example.herbalapp;
 
+import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -21,31 +26,60 @@ import static com.example.herbalapp.ModelConfig.CLASSIFICATION_RESULTS;
 public class Classifier {
 
     private final Interpreter interpreter;
+    private Context mContext;
 
-    public Classifier(Interpreter interpret) {
+    public Classifier(Interpreter interpret, Context context) {
         this.interpreter = interpret;
+        mContext = context;
     }
 
-    public static Classifier classifier(AssetManager assetManager, String modelPath) throws IOException {
-        ByteBuffer byteBuffer = loadModelFile(assetManager, modelPath);
+    public static Classifier classifier(AssetManager assetManager, String modelPath, Context context) throws IOException {
+        ByteBuffer byteBuffer = loadModelFile(assetManager, modelPath, context);
         Interpreter interpreter = new Interpreter(byteBuffer);
-        return new Classifier(interpreter);
+        return new Classifier(interpreter, context);
     }
 
-    private static ByteBuffer loadModelFile(AssetManager assetManager, String modelPath) throws IOException{
+    private static ByteBuffer loadModelFile(AssetManager assetManager, String modelPath, Context context) throws IOException {
         AssetFileDescriptor fileDescriptor = assetManager.openFd(modelPath);
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel = inputStream.getChannel();
         long startOffset = fileDescriptor.getStartOffset();
         long declaredLength = fileDescriptor.getDeclaredLength();
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
+
     }
 
-    public List<Classification> recognizeImage(Bitmap bitmap) {
-        ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
+    public List<Classification> recognizeImage() {
+
+        // soloupis
+        // Fetches image from asset folder to view result from interpreter inference
+        Bitmap assetsBitmap = getBitmapFromAsset(mContext, "7.jpg");
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(assetsBitmap, 32, 32, true);
+
+        Bitmap prep = ImageUtils.preprocess(assetsBitmap);
+
+        ByteBuffer byteBuffer = convertBitmapToByteBuffer(scaledBitmap);
         float[][] result = new float[1][ModelConfig.Label.size()];
         interpreter.run(byteBuffer, result);
+
+        Log.e("RESULT", Arrays.toString(result[0]));
+
         return getSortedResult(result);
+    }
+
+    private Bitmap getBitmapFromAsset(Context context, String filePath) {
+        AssetManager assetManager = context.getAssets();
+
+        InputStream istr;
+        Bitmap bitmap = null;
+        try {
+            istr = assetManager.open(filePath);
+            bitmap = BitmapFactory.decodeStream(istr);
+        } catch (IOException e) {
+            // handle exception
+        }
+
+        return bitmap;
     }
 
     private List<Classification> getSortedResult(float[][] result) {
@@ -68,15 +102,30 @@ public class Classifier {
     private ByteBuffer convertBitmapToByteBuffer(Bitmap bitmap) {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(ModelConfig.MODEL_INPUT_SIZE);
         byteBuffer.order(ByteOrder.nativeOrder());
+        byteBuffer.rewind();
+
         int[] pixels = new int[ModelConfig.INPUT_WIDTH * ModelConfig.INPUT_HEIGHT];
         bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-        for (int pixel : pixels) {
+
+        /*for (int pixel : pixels) {
             float rChannel = (pixel >> 16) & 0xFF;
             float gChannel = (pixel >> 8) & 0xFF;
             float bChannel = (pixel) & 0xFF;
-            float pixelValue = (rChannel + gChannel + bChannel) / 255.f;
+            float pixelValue = (rChannel + gChannel + bChannel);
             byteBuffer.putFloat(pixelValue);
+        }*/
+
+        for (int i = 0; i < ModelConfig.INPUT_WIDTH; ++i) {
+            for (int j = 0; j < ModelConfig.INPUT_WIDTH; ++j) {
+                int pixelValue = pixels[i * ModelConfig.INPUT_WIDTH + j];
+
+                byteBuffer.putFloat((((pixelValue >> 16) & 0xFF)));
+                byteBuffer.putFloat((((pixelValue >> 8) & 0xFF)));
+                byteBuffer.putFloat(((pixelValue & 0xFF)));
+
+            }
         }
+
         return byteBuffer;
     }
 }
