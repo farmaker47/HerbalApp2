@@ -5,6 +5,7 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
@@ -59,6 +60,7 @@ public class Classifier {
         Bitmap prep = ImageUtils.preprocess(assetsBitmap);
 
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(scaledBitmap);
+        Log.e("BYTE", Arrays.toString(new int[]{byteBuffer.array().length}));
         float[][] result = new float[1][ModelConfig.Label.size()];
         interpreter.run(byteBuffer, result);
 
@@ -106,6 +108,8 @@ public class Classifier {
 
         int[] pixels = new int[ModelConfig.INPUT_WIDTH * ModelConfig.INPUT_HEIGHT];
         bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+        Log.e("PIXELS", Arrays.toString(pixels));
+        Log.e("PIXELS_SIZE", String.valueOf(pixels.length));
 
         /*for (int pixel : pixels) {
             float rChannel = (pixel >> 16) & 0xFF;
@@ -115,9 +119,35 @@ public class Classifier {
             byteBuffer.putFloat(pixelValue);
         }*/
 
+        for (int k = 0; k < 10; k++) {
+            int pixelValue = pixels[k];
+
+            Log.e("PIXEL_NUMBER", String.valueOf(k));
+            int R = Color.red(pixelValue);
+            Log.e("PIXEL_VALUE_R", String.valueOf(R));
+            int G = Color.green(pixelValue);
+            Log.e("PIXEL_VALUE_G", String.valueOf(G));
+            int B = Color.blue(pixelValue);
+            Log.e("PIXEL_VALUE_B", String.valueOf(B));
+
+
+        }
+
+        float mean = 128.0f;
+        float std = 128.0f;
         for (int i = 0; i < ModelConfig.INPUT_WIDTH; ++i) {
             for (int j = 0; j < ModelConfig.INPUT_WIDTH; ++j) {
                 int pixelValue = pixels[i * ModelConfig.INPUT_WIDTH + j];
+
+                /*Log.e("PIXEL_VALUE", String.valueOf(pixelValue));
+                int A = Color.alpha(pixelValue);
+                //Log.e("PIXEL_VALUE_A", String.valueOf(A));
+                int R = Color.red(pixelValue);
+                Log.e("PIXEL_VALUE_R", String.valueOf(R));
+                int G = Color.green(pixelValue);
+                Log.e("PIXEL_VALUE_G", String.valueOf(G));
+                int B = Color.blue(pixelValue);
+                Log.e("PIXEL_VALUE_B", String.valueOf(B));*/
 
                 byteBuffer.putFloat((((pixelValue >> 16) & 0xFF)));
                 byteBuffer.putFloat((((pixelValue >> 8) & 0xFF)));
