@@ -55,6 +55,9 @@ public class Classifier {
         // soloupis
         // Fetches image from asset folder to view result from interpreter inference
         Bitmap assetsBitmap = getBitmapFromAsset(mContext, "7.jpg");
+        // https://developer.android.com/reference/android/graphics/Bitmap#createScaledBitmap(android.graphics.Bitmap,%20int,%20int,%20boolean)
+        // true for Bilinear
+        // false for Nearest Neighbour
         Bitmap scaledBitmap = Bitmap.createScaledBitmap(assetsBitmap, 32, 32, true);
 
         Bitmap prep = ImageUtils.preprocess(assetsBitmap);
