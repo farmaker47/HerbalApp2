@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import kotlin.jvm.internal.Intrinsics;
+
 import static com.example.herbalapp.ModelConfig.CLASSIFICATION_THRESHOLD;
 import static com.example.herbalapp.ModelConfig.CLASSIFICATION_RESULTS;
 
@@ -50,15 +52,45 @@ public class Classifier {
 
     }
 
+    /** Crop Bitmap to maintain aspect ratio of model input.   */
+    private final Bitmap cropBitmap(Bitmap bitmap) {
+        float bitmapRatio = (float)bitmap.getHeight() / (float)bitmap.getWidth();
+        float modelInputRatio = 1.0F;
+        double maxDifference = 1.0E-5D;
+        float cropHeight = modelInputRatio - bitmapRatio;
+        boolean var8 = false;
+        if ((double)Math.abs(cropHeight) < maxDifference) {
+            return bitmap;
+        } else {
+            Bitmap var10000;
+            Bitmap croppedBitmap;
+            if (modelInputRatio < bitmapRatio) {
+                cropHeight = (float)bitmap.getHeight() - (float)bitmap.getWidth() / modelInputRatio;
+                var10000 = Bitmap.createBitmap(bitmap, 0, (int)(cropHeight / (float)2), bitmap.getWidth(), (int)((float)bitmap.getHeight() - cropHeight));
+                Intrinsics.checkExpressionValueIsNotNull(var10000, "Bitmap.createBitmap(\n   …toInt()\n                )");
+                croppedBitmap = var10000;
+            } else {
+                cropHeight = (float)bitmap.getWidth() - (float)bitmap.getHeight() * modelInputRatio;
+                var10000 = Bitmap.createBitmap(bitmap, (int)(cropHeight / (float)2), 0, (int)((float)bitmap.getWidth() - cropHeight), bitmap.getHeight());
+                Intrinsics.checkExpressionValueIsNotNull(var10000, "Bitmap.createBitmap(\n   ….height\n                )");
+                croppedBitmap = var10000;
+            }
+
+            return croppedBitmap;
+        }
+    }
+
     public List<Classification> recognizeImage() {
 
         // soloupis
         // Fetches image from asset folder to view result from interpreter inference
         Bitmap assetsBitmap = getBitmapFromAsset(mContext, "7.jpg");
+
+        Bitmap croppedBitmap = cropBitmap(assetsBitmap);
         // https://developer.android.com/reference/android/graphics/Bitmap#createScaledBitmap(android.graphics.Bitmap,%20int,%20int,%20boolean)
         // true for Bilinear
         // false for Nearest Neighbour
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(assetsBitmap, 32, 32, true);
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(croppedBitmap, 32, 32, true);
 
         Bitmap prep = ImageUtils.preprocess(assetsBitmap);
 
@@ -136,8 +168,8 @@ public class Classifier {
 
         }
 
-        float mean = 128.0f;
-        float std = 128.0f;
+        float mean = 0.0f;
+        float std = 1.0f;
         for (int i = 0; i < ModelConfig.INPUT_WIDTH; ++i) {
             for (int j = 0; j < ModelConfig.INPUT_WIDTH; ++j) {
                 int pixelValue = pixels[i * ModelConfig.INPUT_WIDTH + j];
@@ -152,9 +184,9 @@ public class Classifier {
                 int B = Color.blue(pixelValue);
                 Log.e("PIXEL_VALUE_B", String.valueOf(B));*/
 
-                byteBuffer.putFloat((((pixelValue >> 16) & 0xFF)));
-                byteBuffer.putFloat((((pixelValue >> 8) & 0xFF)));
-                byteBuffer.putFloat(((pixelValue & 0xFF)));
+                byteBuffer.putFloat((((pixelValue >> 16) & 0xFF) - mean) / std);
+                byteBuffer.putFloat((((pixelValue >> 8) & 0xFF) - mean) / std);
+                byteBuffer.putFloat(((pixelValue & 0xFF) - mean) / std);
 
             }
         }
