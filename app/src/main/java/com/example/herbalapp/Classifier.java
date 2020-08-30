@@ -8,7 +8,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.Log;
 
+import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.support.common.ops.NormalizeOp;
+import org.tensorflow.lite.support.image.ImageProcessor;
+import org.tensorflow.lite.support.image.TensorImage;
+import org.tensorflow.lite.support.image.ops.ResizeOp;
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,26 +58,28 @@ public class Classifier {
 
     }
 
-    /** Crop Bitmap to maintain aspect ratio of model input.   */
+    /**
+     * Crop Bitmap to maintain aspect ratio of model input.
+     */
     private final Bitmap cropBitmap(Bitmap bitmap) {
-        float bitmapRatio = (float)bitmap.getHeight() / (float)bitmap.getWidth();
+        float bitmapRatio = (float) bitmap.getHeight() / (float) bitmap.getWidth();
         float modelInputRatio = 1.0F;
         double maxDifference = 1.0E-5D;
         float cropHeight = modelInputRatio - bitmapRatio;
         boolean var8 = false;
-        if ((double)Math.abs(cropHeight) < maxDifference) {
+        if ((double) Math.abs(cropHeight) < maxDifference) {
             return bitmap;
         } else {
             Bitmap var10000;
             Bitmap croppedBitmap;
             if (modelInputRatio < bitmapRatio) {
-                cropHeight = (float)bitmap.getHeight() - (float)bitmap.getWidth() / modelInputRatio;
-                var10000 = Bitmap.createBitmap(bitmap, 0, (int)(cropHeight / (float)2), bitmap.getWidth(), (int)((float)bitmap.getHeight() - cropHeight));
+                cropHeight = (float) bitmap.getHeight() - (float) bitmap.getWidth() / modelInputRatio;
+                var10000 = Bitmap.createBitmap(bitmap, 0, (int) (cropHeight / (float) 2), bitmap.getWidth(), (int) ((float) bitmap.getHeight() - cropHeight));
                 Intrinsics.checkExpressionValueIsNotNull(var10000, "Bitmap.createBitmap(\n   …toInt()\n                )");
                 croppedBitmap = var10000;
             } else {
-                cropHeight = (float)bitmap.getWidth() - (float)bitmap.getHeight() * modelInputRatio;
-                var10000 = Bitmap.createBitmap(bitmap, (int)(cropHeight / (float)2), 0, (int)((float)bitmap.getWidth() - cropHeight), bitmap.getHeight());
+                cropHeight = (float) bitmap.getWidth() - (float) bitmap.getHeight() * modelInputRatio;
+                var10000 = Bitmap.createBitmap(bitmap, (int) (cropHeight / (float) 2), 0, (int) ((float) bitmap.getWidth() - cropHeight), bitmap.getHeight());
                 Intrinsics.checkExpressionValueIsNotNull(var10000, "Bitmap.createBitmap(\n   ….height\n                )");
                 croppedBitmap = var10000;
             }
@@ -92,14 +100,38 @@ public class Classifier {
         // false for Nearest Neighbour
         Bitmap scaledBitmap = Bitmap.createScaledBitmap(croppedBitmap, 32, 32, true);
 
-        Bitmap prep = ImageUtils.preprocess(assetsBitmap);
-
+        //Bitmap prep = ImageUtils.preprocess(assetsBitmap);
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(scaledBitmap);
-        Log.e("BYTE", Arrays.toString(new int[]{byteBuffer.array().length}));
-        float[][] result = new float[1][ModelConfig.Label.size()];
-        interpreter.run(byteBuffer, result);
 
-        Log.e("RESULT", Arrays.toString(result[0]));
+
+        // Initialization code
+        // Create an ImageProcessor with all ops required. For more ops, please
+        // refer to the ImageProcessor Architecture section in this README.
+        ImageProcessor imageProcessor =
+                new ImageProcessor.Builder()
+                        .add(new ResizeOp(32, 32, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
+                        //.add(new NormalizeOp(127.5f, 127.5f))
+                        .build();
+
+        // Create a TensorImage object. This creates the tensor of the corresponding
+        // tensor type (uint8 in this case) that the TensorFlow Lite interpreter needs.
+        TensorImage tImage = new TensorImage(DataType.FLOAT32);
+
+        // Analysis code for every frame
+        // Preprocess the image
+        tImage.load(assetsBitmap);
+        tImage = imageProcessor.process(tImage);
+
+        //Log.e("BYTE", Arrays.toString(new int[]{byteBuffer.array().length}));
+        float[][] result = new float[1][ModelConfig.Label.size()];
+
+        // Create a container for the result and specify that this is a quantized model.
+        // Hence, the 'DataType' is defined as UINT8 (8-bit unsigned integer)
+        TensorBuffer probabilityBuffer = TensorBuffer.createFixedSize(new int[]{1, 10}, DataType.FLOAT32);
+
+        interpreter.run(tImage.getBuffer(), probabilityBuffer.getBuffer());
+
+        Log.e("RESULT", Arrays.toString(probabilityBuffer.getFloatArray()));
 
         return getSortedResult(result);
     }
