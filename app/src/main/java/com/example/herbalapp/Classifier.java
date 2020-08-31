@@ -109,7 +109,7 @@ public class Classifier {
         // refer to the ImageProcessor Architecture section in this README.
         ImageProcessor imageProcessor =
                 new ImageProcessor.Builder()
-                        .add(new ResizeOp(32, 32, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
+                        .add(new ResizeOp(32, 32, ResizeOp.ResizeMethod.BILINEAR))
                         //.add(new NormalizeOp(127.5f, 127.5f))
                         .build();
 
@@ -129,9 +129,9 @@ public class Classifier {
         // Hence, the 'DataType' is defined as UINT8 (8-bit unsigned integer)
         TensorBuffer probabilityBuffer = TensorBuffer.createFixedSize(new int[]{1, 10}, DataType.FLOAT32);
 
-        interpreter.run(tImage.getBuffer(), probabilityBuffer.getBuffer());
+        interpreter.run(/*tImage.getBuffer()*/byteBuffer, /*probabilityBuffer.getBuffer()*/result);
 
-        Log.e("RESULT", Arrays.toString(probabilityBuffer.getFloatArray()));
+        Log.e("RESULT", /*Arrays.toString(probabilityBuffer.getFloatArray())*/Arrays.toString(result[0]));
 
         return getSortedResult(result);
     }
