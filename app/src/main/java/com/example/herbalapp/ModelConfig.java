@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ModelConfig {
-    public static String MODEL = "leaves.tflite";
+    public static String MODEL = "straw.tflite";
 
     public static final int INPUT_WIDTH = 32;
     public static final int INPUT_HEIGHT = 32;

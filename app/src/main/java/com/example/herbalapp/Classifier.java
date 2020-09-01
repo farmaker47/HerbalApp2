@@ -10,7 +10,6 @@ import android.util.Log;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.support.common.ops.NormalizeOp;
 import org.tensorflow.lite.support.image.ImageProcessor;
 import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.image.ops.ResizeOp;
@@ -92,7 +91,7 @@ public class Classifier {
 
         // soloupis
         // Fetches image from asset folder to view result from interpreter inference
-        Bitmap assetsBitmap = getBitmapFromAsset(mContext, "7.jpg");
+        Bitmap assetsBitmap = getBitmapFromAsset(mContext, "picture.jpg");
 
         Bitmap croppedBitmap = cropBitmap(assetsBitmap);
         // https://developer.android.com/reference/android/graphics/Bitmap#createScaledBitmap(android.graphics.Bitmap,%20int,%20int,%20boolean)
@@ -129,9 +128,9 @@ public class Classifier {
         // Hence, the 'DataType' is defined as UINT8 (8-bit unsigned integer)
         TensorBuffer probabilityBuffer = TensorBuffer.createFixedSize(new int[]{1, 10}, DataType.FLOAT32);
 
-        interpreter.run(/*tImage.getBuffer()*/byteBuffer, /*probabilityBuffer.getBuffer()*/result);
+        interpreter.run(tImage.getBuffer(), probabilityBuffer.getBuffer());
 
-        Log.e("RESULT", /*Arrays.toString(probabilityBuffer.getFloatArray())*/Arrays.toString(result[0]));
+        Log.e("RESULT", Arrays.toString(probabilityBuffer.getFloatArray())/*Arrays.toString(result[0])*/);
 
         return getSortedResult(result);
     }
