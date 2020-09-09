@@ -14,6 +14,8 @@ import org.tensorflow.lite.support.image.ImageProcessor;
 import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.image.ops.ResizeOp;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
+import org.tensorflow.lite.task.vision.detector.Detection;
+import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -91,7 +93,7 @@ public class Classifier {
 
         // soloupis
         // Fetches image from asset folder to view result from interpreter inference
-        Bitmap assetsBitmap = getBitmapFromAsset(mContext, "picture.jpg");
+        Bitmap assetsBitmap = getBitmapFromAsset(mContext, "dogs.jpg");
 
         Bitmap croppedBitmap = cropBitmap(assetsBitmap);
         // https://developer.android.com/reference/android/graphics/Bitmap#createScaledBitmap(android.graphics.Bitmap,%20int,%20int,%20boolean)
@@ -132,6 +134,25 @@ public class Classifier {
 
         Log.e("RESULT", Arrays.toString(probabilityBuffer.getFloatArray())/*Arrays.toString(result[0])*/);
 
+
+        /// Task library
+        // Initialization
+        ObjectDetector.ObjectDetectorOptions options = ObjectDetector.ObjectDetectorOptions.builder().setMaxResults(3).build();
+        ObjectDetector objectDetector = null;
+        try {
+            objectDetector = ObjectDetector.createFromFileAndOptions(mContext, "object.tflite", options);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Run inference
+        List<Detection> results = null;
+        if (objectDetector != null) {
+            results = objectDetector.detect(tImage);
+        }
+        if (results != null) {
+            Log.e("OBJECT_DETECTOR", results.toString());
+        }
         return getSortedResult(result);
     }
 
